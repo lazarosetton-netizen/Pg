@@ -1,18 +1,25 @@
 workflows:
   android-apk:
-    name: Gerar APK Pg
+    name: Gerar APK Pg Atualizado
     max_build_duration: 60
     instance_type: mac_mini_m1
     scripts:
-      - name: Instalar Dependências
-        script: npm install
-      - name: Build do Projeto
+      - name: Instalar Dependencias e Capacitor
+        script: |
+          npm install
+          npm install @capacitor/android
+      - name: Build do Projeto Web
         script: npm run build
-      - name: Capacitor Sync
+      - name: Criar Pasta Android e Sincronizar
         script: |
           npx cap add android || true
+          npx cap copy android
           npx cap sync android
-      - name: Gerar APK (Gradle)
+      - name: Configurar Permissão de Internet (Automatizado)
+        script: |
+          sed -i '' '/<application/i \
+          <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
+      - name: Gerar APK
         script: |
           cd android
           ./gradlew assembleDebug

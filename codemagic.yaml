@@ -1,6 +1,6 @@
 workflows:
   android-apk:
-    name: Gerar APK Pg Atualizado
+    name: Gerar APK Pg Final
     max_build_duration: 60
     instance_type: mac_mini_m1
     scripts:
@@ -15,11 +15,14 @@ workflows:
           npx cap add android || true
           npx cap copy android
           npx cap sync android
-      - name: Configurar Permissão de Internet (Automatizado)
+      - name: Liberar Acesso a Internet e Sites Externos
         script: |
-          # Este comando insere a permissão de internet no arquivo AndroidManifest automaticamente
+          # 1. Adiciona permissão de Internet
           sed -i '' '/<application/i \
           <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
+          
+          # 2. Força o Android a aceitar tráfego de sites de notícias (HTTP/HTTPS)
+          sed -i '' 's/<application/<application android:usesCleartextTraffic="true"/' android/app/src/main/AndroidManifest.xml
       - name: Gerar APK
         script: |
           cd android

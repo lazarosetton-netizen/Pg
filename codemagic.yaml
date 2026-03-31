@@ -1,4 +1,4 @@
-workflow:
+workflows:
   android-apk:
     name: Gerar APK Pg
     max_build_duration: 60

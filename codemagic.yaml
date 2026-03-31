@@ -17,6 +17,7 @@ workflows:
           npx cap sync android
       - name: Configurar Permissão de Internet (Automatizado)
         script: |
+          # Este comando insere a permissão de internet no arquivo AndroidManifest automaticamente
           sed -i '' '/<application/i \
           <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
       - name: Gerar APK

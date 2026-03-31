@@ -4,25 +4,27 @@ workflows:
     max_build_duration: 60
     instance_type: mac_mini_m1
     scripts:
-      - name: Instalar Dependencias e Capacitor
+      - name: Instalar Dependencias
         script: |
           npm install
-          npm install @capacitor/android
+          npm install @capacitor/android @capacitor/core @capacitor/cli
       - name: Build do Projeto Web
-        script: npm run build
-      - name: Criar Pasta Android e Sincronizar
         script: |
-          npx cap add android || true
+          npm run build
+      - name: Resetar e Criar Pasta Android
+        script: |
+          # Remove pastas antigas para garantir que nada venha errado
+          rm -rf android
+          npx cap add android
           npx cap copy android
-          npx cap sync android
-      - name: Liberar Acesso a Internet e Sites Externos
+      - name: Liberar Internet e Sites Externos
         script: |
-          # 1. Adiciona permissão de Internet
+          # Adiciona permissão de Internet e tráfego de sites de notícias
           sed -i '' '/<application/i \
           <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
-          
-          # 2. Força o Android a aceitar tráfego de sites de notícias (HTTP/HTTPS)
           sed -i '' 's/<application/<application android:usesCleartextTraffic="true"/' android/app/src/main/AndroidManifest.xml
+      - name: Sincronizar Final
+        script: npx cap sync android
       - name: Gerar APK
         script: |
           cd android
@@ -32,4 +34,4 @@ workflows:
     publishing:
       email:
         recipients:
-          - lazarosetton@gmail.com 
+          - seu-email@gmail.com

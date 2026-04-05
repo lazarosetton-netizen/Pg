@@ -1,42 +1,44 @@
 workflows:
   android-apk:
-    name: Gerar APK Pg Final - Correcao Total
+    name: PG News - Correcao Final de Noticias
     max_build_duration: 60
     instance_type: mac_mini_m1
     scripts:
-      - name: Instalar Dependencias e SDK AI
+      - name: Instalar Dependencias Limpas
         script: |
           npm install
-          npm install @capacitor/android @capacitor/core @capacitor/cli
-          npm install @google/generative-ai
-      - name: Configurar Chave de API e VITE_BASE
+          # Garante a instalacao da biblioteca correta de IA
+          npm install @google/generative-ai @capacitor/android @capacitor/core @capacitor/cli
+      - name: Injetar Chave e Configurar Vite
         script: |
-          # Cria o arquivo de ambiente
+          # Cria o .env
           echo "VITE_GEMINI_API_KEY=AIzaSyCFlkjLQ9M4WoK-qVKQ_P8VPs1iy7Kwce0" > .env
-          # Ajusta o vite.config.ts para caminhos relativos
+          
+          # Ajusta o vite.config.ts para aceitar conexoes externas e caminhos relativos
           sed -i '' "s/plugins: \[react(), tailwindcss()\],/plugins: [react(), tailwindcss()], base: '.\/',/" vite.config.ts
-      - name: Build do Projeto Web (Ignorando erros de Tipagem)
+          
+          # TRUQUE MESTRE: Substitui a variavel de ambiente direto no código antes do build
+          sed -i '' "s/import.meta.env.VITE_GEMINI_API_KEY/'AIzaSyCFlkjLQ9M4WoK-qVKQ_P8VPs1iy7Kwce0'/g" src/App.tsx
+      - name: Build do Projeto Web
         script: |
-          # Usamos npx vite build para ignorar o 'tsc' que está dando erro
           npx vite build
-      - name: Preparar Pasta Android do Zero
+      - name: Preparar Android
         script: |
           rm -rf android
           npx cap add android
           npx cap copy android
-      - name: Ajustar Permissoes de Internet e Seguranca Total
+      - name: Liberar Permissoes Totais
         script: |
-          # Adiciona permissoes no Manifesto
+          # Adiciona permissao de internet e rede no Manifesto
           sed -i '' '/<application/i \
           <uses-permission android:name="android.permission.INTERNET" /> \
           <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />' android/app/src/main/AndroidManifest.xml
           
-          # Permite trafego HTTP/HTTPS
+          # Permite trafego HTTP (necessario para buscar noticias de sites variados)
           sed -i '' 's/<application/<application android:usesCleartextTraffic="true"/' android/app/src/main/AndroidManifest.xml
-      - name: Sincronizar Final
-        script: npx cap sync android
-      - name: Gerar APK
+      - name: Sincronizar e Gerar APK
         script: |
+          npx cap sync android
           cd android
           ./gradlew assembleDebug
     artifacts:

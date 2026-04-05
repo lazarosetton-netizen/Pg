@@ -1,6 +1,6 @@
 workflows:
   android-apk:
-    name: Gerar APK Pg - Correcao Total
+    name: Gerar APK Pg Final - Correcao Total
     max_build_duration: 60
     instance_type: mac_mini_m1
     scripts:
@@ -8,29 +8,30 @@ workflows:
         script: |
           npm install
           npm install @capacitor/android @capacitor/core @capacitor/cli
-      - name: Configurar VITE_BASE e API_KEY
+      - name: Configurar Chave de API e VITE_BASE
         script: |
-          # 1. Força o Vite a usar caminhos relativos para o Android não abrir tela branca
-          sed -i '' "s/plugins: \[react(), tailwindcss()\],/plugins: [react(), tailwindcss()], base: '.\/',/" vite.config.ts
+          # 1. Cria o arquivo de ambiente com a sua chave (SUBSTITUA ABAIXO)
+          echo "VITE_GEMINI_API_KEY=SUA_CHAVE_AQUI" > .env
           
-          # 2. Cria o arquivo de ambiente com a sua chave (Substitua abaixo)
-          echo "VITE_GEMINI_API_KEY=COLOQUE_AQUI_SUA_CHAVE_DO_GEMINI" > .env
+          # 2. Força o Vite a usar caminhos relativos para não dar tela branca no Android
+          # Isso corrige o vite.config.ts automaticamente durante o build
+          sed -i '' "s/plugins: \[react(), tailwindcss()\],/plugins: [react(), tailwindcss()], base: '.\/',/" vite.config.ts
       - name: Build do Projeto Web
         script: |
           npm run build
-      - name: Preparar Pasta Android
+      - name: Preparar Pasta Android do Zero
         script: |
-          # Remove e recria para evitar lixo de builds anteriores
+          # Remove pastas antigas para garantir que nada venha com erro
           rm -rf android
           npx cap add android
           npx cap copy android
-      - name: Ajustar Permissoes Android (Internet e HTTP)
+      - name: Ajustar Permissoes de Internet e Segurança
         script: |
-          # Adiciona permissão de internet no Manifesto que estava faltando
+          # Adiciona permissão de internet no Manifesto Android
           sed -i '' '/<application/i \
           <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
           
-          # Permite que o app acesse sites de notícias (Cleartext)
+          # Permite que o app acesse sites de notícias externos (Cleartext Traffic)
           sed -i '' 's/<application/<application android:usesCleartextTraffic="true"/' android/app/src/main/AndroidManifest.xml
       - name: Sincronizar Final
         script: npx cap sync android

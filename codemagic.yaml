@@ -11,7 +11,7 @@ workflows:
       - name: Configurar Chave de API e VITE_BASE
         script: |
           # 1. Cria o arquivo de ambiente com a sua chave (SUBSTITUA ABAIXO)
-          echo "VITE_GEMINI_API_KEY=SUA_CHAVE_AQUI" > .env
+          echo "VITE_GEMINI_API_KEY=AIzaSyCFlkjLQ9M4WoK-qVKQ_P8VPs1iy7kWce0" > .env
           
           # 2. Força o Vite a usar caminhos relativos para não dar tela branca no Android
           # Isso corrige o vite.config.ts automaticamente durante o build

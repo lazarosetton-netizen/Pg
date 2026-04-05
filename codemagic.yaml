@@ -1,6 +1,6 @@
 workflows:
   android-apk:
-    name: Gerar APK Pg Final - Forçar Build
+    name: Gerar APK Pg Final - Correcao Conexao
     max_build_duration: 60
     instance_type: mac_mini_m1
     scripts:
@@ -14,17 +14,20 @@ workflows:
           sed -i '' "s/plugins: \[react(), tailwindcss()\],/plugins: [react(), tailwindcss()], base: '.\/',/" vite.config.ts
       - name: Build do Projeto Web
         script: |
-          # Comando para ignorar erros de TypeScript e gerar os arquivos
-          npx vite build
+          npm run build
       - name: Preparar Pasta Android do Zero
         script: |
           rm -rf android
           npx cap add android
           npx cap copy android
-      - name: Ajustar Permissoes de Internet e Seguranca
+      - name: Ajustar Permissoes de Internet e Seguranca Total
         script: |
+          # 1. Adiciona permissao de INTERNET no AndroidManifest
           sed -i '' '/<application/i \
-          <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
+          <uses-permission android:name="android.permission.INTERNET" /> \
+          <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />' android/app/src/main/AndroidManifest.xml
+          
+          # 2. Permite trafego de dados externos (HTTP/HTTPS)
           sed -i '' 's/<application/<application android:usesCleartextTraffic="true"/' android/app/src/main/AndroidManifest.xml
       - name: Sincronizar Final
         script: npx cap sync android

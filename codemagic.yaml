@@ -10,28 +10,26 @@ workflows:
           npm install @capacitor/android @capacitor/core @capacitor/cli
       - name: Configurar Chave de API e VITE_BASE
         script: |
-          # 1. Cria o arquivo de ambiente com a sua chave (SUBSTITUA ABAIXO)
-          echo "VITE_GEMINI_API_KEY=AIzaSyCFlkjLQ9M4WoK-qVKQ_P8VPs1iy7kWce0" > .env
+          # 1. Cria o arquivo de ambiente com a sua chave
+          echo "VITE_GEMINI_API_KEY=AIzaSyCFlkjLQ9M4WoK-qVKQ_P8VPs1iy7Kwce0" > .env
           
-          # 2. Força o Vite a usar caminhos relativos para não dar tela branca no Android
-          # Isso corrige o vite.config.ts automaticamente durante o build
+          # 2. Força o Vite a usar caminhos relativos
           sed -i '' "s/plugins: \[react(), tailwindcss()\],/plugins: [react(), tailwindcss()], base: '.\/',/" vite.config.ts
       - name: Build do Projeto Web
         script: |
           npm run build
       - name: Preparar Pasta Android do Zero
         script: |
-          # Remove pastas antigas para garantir que nada venha com erro
           rm -rf android
           npx cap add android
           npx cap copy android
-      - name: Ajustar Permissoes de Internet e Segurança
+      - name: Ajustar Permissoes de Internet e Seguranca
         script: |
-          # Adiciona permissão de internet no Manifesto Android
+          # Adiciona permissao de internet
           sed -i '' '/<application/i \
           <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
           
-          # Permite que o app acesse sites de notícias externos (Cleartext Traffic)
+          # Permite trafego de dados externo
           sed -i '' 's/<application/<application android:usesCleartextTraffic="true"/' android/app/src/main/AndroidManifest.xml
       - name: Sincronizar Final
         script: npx cap sync android
